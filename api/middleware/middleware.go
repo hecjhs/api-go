@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -74,17 +73,11 @@ func (q *Queue) Read() []*Queue {
 
 func (q *Queue) ReadFromDB(domain string) models.Domain {
 	var path, _ = filepath.Abs("")
-
 	db, _ := gorm.Open("sqlite3", path+"/api/fixtures/data.db")
 	defer db.Close()
-	// domains := []models.Domain{}
-	// db.Find(&domains)
-	// fmt.Printf("from db %v", domains)
-
 	d := models.Domain{Domain: domain}
-	db.Where(&d).First(&d)
+	db.First(&d)
 	return d
-
 }
 
 // MockQueue should mock an Array of Queues
@@ -118,9 +111,7 @@ func ProxyMiddleware(c iris.Context) {
 	}
 	var repo Repository
 	repo = &Queue{}
-	fmt.Println("FROM HEADER", domain)
 	d := repo.ReadFromDB(domain)
-	fmt.Printf("value: %v type %T", d, d)
 	if d.Priority < 5 && d.Weight < 5 {
 		QPriority["high"] = append(QPriority["high"], domain)
 	} else if d.Priority < 5 || d.Weight < 5 {
